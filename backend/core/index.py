@@ -62,4 +62,7 @@ class DocumentIndexer:
 
             for palabra, frecuencia in frecuencias.items():
                 if frecuencia <= self.threshold:  # Excluir palabras muy comunes
-                    self.TF_IDF[palabra][doc] = (frecuencia / total_palabras) * math.log10(total_documentos / len(self.Larousse[palabra]))
+                    # Prevenir DivisionByZero y math domain errors
+                    num_docs_con_palabra = len(self.Larousse[palabra])
+                    if total_palabras > 0 and num_docs_con_palabra > 0:
+                        self.TF_IDF[palabra][doc] = (frecuencia / total_palabras) * math.log10(total_documentos / num_docs_con_palabra)
