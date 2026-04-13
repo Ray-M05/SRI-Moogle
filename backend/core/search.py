@@ -7,7 +7,9 @@ class SearchEngine:
 
     def obtener_snippet(self, documento, palabras_query):
         """Encuentra el fragmento más relevante del documento para las palabras de la consulta y sugerencias."""
-        texto = self.indexer.documentos[documento]
+        texto = self.indexer.documentos.get(documento, "")
+        if not texto: return ""
+        
         palabras_documento = texto.split()
 
         max_relevancia = 0
@@ -18,7 +20,7 @@ class SearchEngine:
         palabras_posiciones = [i for i, palabra in enumerate(palabras_documento) if palabra in palabras_query]
 
         if not palabras_posiciones:
-            return texto[:200]  # Devuelve los primeros 200 caracteres si no hay coincidencias
+            return texto[:200] + "..."  # Devuelve los primeros 200 caracteres si no hay coincidencias
 
         # Buscar el mejor snippet alrededor de las palabras clave
         for i in palabras_posiciones:
@@ -33,21 +35,15 @@ class SearchEngine:
                 mejor_inicio = inicio
                 mejor_fin = fin
 
-        # Construir el snippet
+        # Construir el snippet básico
         snippet = " ".join(palabras_documento[mejor_inicio:mejor_fin])
 
-        # Extender el snippet para incluir frases completas
-        punto_inicio = texto.find(snippet)
-        if punto_inicio != -1:
-            punto_fin = texto.find(".", punto_inicio + len(snippet))  # Encuentra el final de la oración
-            if punto_fin != -1:
-                snippet = texto[punto_inicio:punto_fin + 1]
-
-        return snippet
+        return snippet + "..."
 
 
 
     def query(self, query):
+        if not query.strip(): return [], {}
         palabras_query = self.indexer.limpiar_texto(query)  # Filtrar las palabras no deseadas
         scores = defaultdict(float)
         sugerencias = {}
@@ -75,10 +71,14 @@ class SearchEngine:
         # Añadir palabras de sugerencias a palabras_query
         palabras_query.extend(sugerencias.values())
 
-        # Generar resultados con snippets
+        # Generar resultados con snippets (sólo top 10 para evitar tiempos de respuesta lentos en API)
         resultados_con_snippets = [
-            (doc, score, self.obtener_snippet(doc, palabras_query)) for doc, score in resultados
+            {
+                "document": doc,
+                "title": doc.replace('.txt', '').replace('_', ' ').title(),
+                "score": score,
+                "snippet": self.obtener_snippet(doc, palabras_query)
+            } for doc, score in resultados[:10]
         ]
 
         return resultados_con_snippets, sugerencias
-
