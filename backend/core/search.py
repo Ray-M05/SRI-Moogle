@@ -1,3 +1,4 @@
+import re
 from Levenshtein import distance as levenshtein_distance
 from collections import defaultdict
 
@@ -17,7 +18,12 @@ class SearchEngine:
         mejor_fin = 0
 
         ventana_tamano = 30  # Tamaño de la ventana en palabras
-        palabras_posiciones = [i for i, palabra in enumerate(palabras_documento) if palabra in palabras_query]
+        
+        # Limpiamos cada palabra del documento sólo para la comparación
+        palabras_posiciones = [
+            i for i, palabra in enumerate(palabras_documento)
+            if re.sub(r'[\W_]+', '', palabra.lower()) in palabras_query
+        ]
 
         if not palabras_posiciones:
             return texto[:200] + "..."  # Devuelve los primeros 200 caracteres si no hay coincidencias
@@ -27,8 +33,9 @@ class SearchEngine:
             inicio = max(0, i - ventana_tamano // 2)
             fin = min(len(palabras_documento), i + ventana_tamano // 2)
             ventana = palabras_documento[inicio:fin]
+            ventana_limpia = [re.sub(r'[\W_]+', '', p.lower()) for p in ventana]
 
-            relevancia = sum(1 for palabra in palabras_query if palabra in ventana)
+            relevancia = sum(1 for palabra in palabras_query if palabra in ventana_limpia)
 
             if relevancia > max_relevancia:
                 max_relevancia = relevancia

@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import SearchBar from './components/SearchBar';
 import ResultList from './components/ResultList';
+import DocumentViewer from './components/DocumentViewer';
 import { useSearch } from './hooks/useSearch';
 
 function App() {
   const { results, suggestions, isLoading, error, performSearch } = useSearch();
+  const [selectedDocument, setSelectedDocument] = useState(null);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 w-full font-sans overflow-x-hidden selection:bg-blue-200">
+    <div className="min-h-screen bg-gray-50 text-gray-900 w-full font-sans overflow-x-hidden selection:bg-blue-200 relative">
       {/* Fondo de adorno superior */}
       <div className="absolute top-0 w-full h-96 bg-gradient-to-b from-blue-100/50 to-transparent -z-10 pointer-events-none"></div>
 
@@ -35,7 +38,7 @@ function App() {
         
         {/* Resultados */}
         {results && results.length > 0 ? (
-           <ResultList results={results} suggestions={suggestions} />
+           <ResultList results={results} suggestions={suggestions} onSelectDocument={setSelectedDocument} />
         ) : (
            <div className="mt-16 text-center text-gray-400 max-w-md mx-auto italic">
               Empieza escribiendo algo como "asesino", "razón" o "gato" para ver cómo el algoritmo TD-IDF y la distancia Levenshtein rankean los resultados.
@@ -43,6 +46,14 @@ function App() {
         )}
         
       </main>
+
+      {/* Modal / Visor de Documento */}
+      {selectedDocument && (
+        <DocumentViewer 
+          documentName={selectedDocument} 
+          onClose={() => setSelectedDocument(null)} 
+        />
+      )}
     </div>
   );
 }

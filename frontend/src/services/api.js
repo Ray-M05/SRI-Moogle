@@ -7,3 +7,11 @@ export const searchDocuments = async (query) => {
   }
   return await response.json();
 };
+
+export const getDocumentContent = async (documentName) => {
+  const response = await fetch(`${API_URL}/documents/${encodeURIComponent(documentName)}`);
+  if (!response.ok) {
+    throw new Error('No se pudo cargar el documento.');
+  }
+  return await response.json();
+};

@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any
@@ -70,4 +70,22 @@ def search_documents(q: str = Query(..., description="Query terms to search for"
         "results": resultados,
         "suggestions": sugerencias,
         "total_found": len(resultados)
+    }
+
+@app.get("/api/documents/{document_name}", tags=["Documents"])
+def get_document(document_name: str):
+    """
+    Retorna el contenido completo de un documento específico.
+    """
+    file_path = os.path.join(INDEX_DIR, document_name)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Documento no encontrado")
+        
+    with open(file_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+        
+    return {
+        "document": document_name,
+        "title": document_name.replace('.txt', '').replace('_', ' ').title(),
+        "content": content
     }

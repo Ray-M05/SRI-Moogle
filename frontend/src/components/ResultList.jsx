@@ -1,6 +1,6 @@
 import ResultItem from './ResultItem';
 
-export default function ResultList({ results, suggestions }) {
+export default function ResultList({ results, suggestions, onSelectDocument }) {
   // Si no hay resultados pero se realizó la búsqueda
   if (!results || results.length === 0) {
     return null; // O podríamos retornar un div de "No resultados"
@@ -33,11 +33,11 @@ export default function ResultList({ results, suggestions }) {
       {/* Lista de resultados */}
       <div className="space-y-6 flex flex-col items-stretch">
         <div className="text-gray-500 text-sm text-left px-2 border-b pb-2">
-          Se encontraron <strong>{results.length}</strong> resultados.
+          Se encontraron <strong>{results.length}</strong> resultados. Haz clic en un título para leer completo.
         </div>
         
         {results.map((result, idx) => (
-          <ResultItem key={idx} result={result} />
+          <ResultItem key={idx} result={result} onSelectDocument={onSelectDocument} />
         ))}
       </div>
     </div>
