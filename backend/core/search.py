@@ -19,10 +19,10 @@ class SearchEngine:
 
         ventana_tamano = 30  # Tamaño de la ventana en palabras
         
-        # Limpiamos cada palabra del documento sólo para la comparación
+        # Extraemos la raíz de cada palabra del documento para comparar con los stems del query
         palabras_posiciones = [
             i for i, palabra in enumerate(palabras_documento)
-            if re.sub(r'[\W_]+', '', palabra.lower()) in palabras_query
+            if self.indexer.stemmer.stem(re.sub(r'[\W_]+', '', palabra.lower())) in palabras_query
         ]
 
         if not palabras_posiciones:
@@ -33,7 +33,7 @@ class SearchEngine:
             inicio = max(0, i - ventana_tamano // 2)
             fin = min(len(palabras_documento), i + ventana_tamano // 2)
             ventana = palabras_documento[inicio:fin]
-            ventana_limpia = [re.sub(r'[\W_]+', '', p.lower()) for p in ventana]
+            ventana_limpia = [self.indexer.stemmer.stem(re.sub(r'[\W_]+', '', p.lower())) for p in ventana]
 
             relevancia = sum(1 for palabra in palabras_query if palabra in ventana_limpia)
 

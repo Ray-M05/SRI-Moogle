@@ -2,6 +2,7 @@ import os
 import re
 import math
 from collections import defaultdict
+from nltk.stem import SnowballStemmer
 
 class DocumentIndexer:
     def __init__(self):
@@ -10,6 +11,7 @@ class DocumentIndexer:
         self.documentos = {}
         self.threshold = None
         self.stop_words = set()  # Palabras no deseadas
+        self.stemmer = SnowballStemmer('spanish')  # Agregado para NLP (Stemming)
 
     def cargar_stop_words(self, ruta_archivo):
         """Carga las palabras no deseadas desde un archivo."""
@@ -20,10 +22,12 @@ class DocumentIndexer:
             print(f"Error cargando las stop words: {e}")
 
     def limpiar_texto(self, texto):
-        """Elimina puntuaciones, pasa a minúsculas y excluye palabras no deseadas."""
+        """Elimina puntuaciones, pasa a minúsculas, excluye palabras no deseadas y aplica stemming (NLP)."""
         texto = re.sub(r'[\W_]+', ' ', texto.lower())  # Eliminar puntuación y pasar a minúsculas
         palabras = texto.split()
-        return [palabra for palabra in palabras if palabra not in self.stop_words]  # Excluir palabras no deseadas
+        # Filtrar stop words y aplicar stemming (truncar a la raíz de la palabra)
+        palabras_filtradas = [palabra for palabra in palabras if palabra not in self.stop_words]
+        return [self.stemmer.stem(palabra) for palabra in palabras_filtradas]
 
     def calcular_umbral(self):
         """Calcula el umbral dinámico basado en la frecuencia de las palabras en todo el corpus."""
